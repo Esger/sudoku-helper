@@ -1,0 +1,15 @@
+<template>
+    <div class="sudokuGrid">
+        <template class="row"
+                  repeat.for="row of grid">
+            <div class="cell 
+                        row${$parent.$index}__cell${$index}
+                        ${cell.value == 0 ? 'cell--unset' : 'cell--isSet'}"
+                 repeat.for="cell of row">
+                <p class="possible"
+                   repeat.for="possible of cell.possibles"
+                   click.delegate="selectNumber($parent.$parent.$index,$parent.$index,possible)">${cell.value == 0 ? possible : cell.value}</p>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,3 +1,59 @@
-.grid {
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tileDefinition {
+    cursor: pointer;
+    font-size: 2vmin;
+    line-height: 0;
+    color: #333;
+    text-shadow: 0 1px 1px #ccc;
+    background-color: LemonChiffon;
+    box-shadow: 0 1px 2px #aaa;
+    border-radius: 2px;
+}
+
+.centerXYDefinition {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sudokuGrid {
+    width: 95vmin;
+    height: 95vmin;
     display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+}
+
+.cell {
+    .tileDefinition;
+    margin: 0 5px 5px 0;
+
+    &[class*='--unset'] {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+    }
+
+    &[class*='--isSet'] {
+        .centerXYDefinition;
+    }
+}
+
+.cell[class*=cell2], .cell[class*=cell5] {
+    margin-right: 10px;
+}
+
+.cell[class*=row2], .cell[class*=row5] {
+    margin-bottom: 10px;
+}
+
+.possible {
+    .tileDefinition;
+    .centerXYDefinition;
+    margin: 1px;
 }
