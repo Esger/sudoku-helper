@@ -6,8 +6,10 @@ export class GridCustomElement {
 
     constructor(bindingSignaler) {
         this._bindingSignaler = bindingSignaler;
-        this.grid = [];
         this._possibles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        this._doChecks = 0;
+        this._processHandleId = undefined;
+        this.grid = [];
     }
 
     attached() {
@@ -18,12 +20,30 @@ export class GridCustomElement {
             }
             this.grid.push(row);
         }
+        this._processGrid();
     }
 
-    _applyGridvalue(row, cell, value) {
+    _addCheck() {
+        this._doChecks++;
+    }
+
+    _removeCheck() {
+        this._doChecks--;
+    }
+
+    _applyGridvalue(row, col, value) {
         if (value >= 0) {
-            this.grid[row][cell].value = value;
+            this.grid[row][col].value = value;
         }
+        this._sweepGrid(row, col, value);
+        this._addCheck();
+        this._bindingSignaler.signal('updatePossibles');
+    }
+
+    _sweepSelf(row, col) {
+        this.grid[row][col].possibles.forEach((p, i, possibles) => {
+            possibles[i] = -1;
+        });
     }
 
     _sweepRow(row, value) {
@@ -33,9 +53,9 @@ export class GridCustomElement {
     }
 
     _sweepCol(col, value) {
-        for (let row = 0; row < this.grid.length; row++) {
-            this.grid[row][col].possibles[value] = -1;
-        }
+        this._possibles.forEach(rowIndex => {
+            this.grid[rowIndex][col].possibles[value] = -1;
+        });
     }
 
     _sweepBlock(row, col, value) {
@@ -52,16 +72,46 @@ export class GridCustomElement {
         }
     }
 
-    selectNumber(row, cell, value) {
-
-        this._applyGridvalue(row, cell, value);
-
+    _sweepGrid(row, col, value) {
+        this._sweepSelf(row, col);
         this._sweepRow(row, value);
-        this._sweepCol(cell, value);
-        this._sweepBlock(row, cell, value);
+        this._sweepCol(col, value);
+        this._sweepBlock(row, col, value);
+    }
 
-        this._bindingSignaler.signal('updatePossibles');
-        console.log(...arguments);
+    _findSinglePossibilities() {
+        this._possibles.forEach(row => {
+            this._possibles.forEach(col => {
+                let possiblesCount = 0;
+                let possibles = this.grid[row][col].possibles;
+                let singlePossibility;
+                possibles.forEach(possible => {
+                    if (possible >= 0) {
+                        singlePossibility = possible;
+                        possiblesCount++;
+                    }
+                });
+                if (possiblesCount == 1) {
+                    this._applyGridvalue(row, col, singlePossibility);
+                }
+            });
+        });
+    }
+
+    _processGrid() {
+        this._processHandleId = setInterval(() => {
+            if (this._doChecks > 0) {
+                this._findSinglePossibilities();
+                this._removeCheck();
+            }
+        }, 1000);
+    }
+
+    selectNumber(row, col, value) {
+
+        this._applyGridvalue(row, col, value);
+
+        // console.log(...arguments);
 
     }
 }
