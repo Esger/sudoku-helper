@@ -38,7 +38,19 @@ export class GridCustomElement {
         }
     }
 
-    _sweepBlock(row, col, value) { }
+    _sweepBlock(row, col, value) {
+        let blockY = Math.floor(row / 3);
+        let blockX = Math.floor(col / 3);
+        let startY = blockY * 3;
+        let endY = startY + 2;
+        let startX = blockX * 3;
+        let endX = startX + 2;
+        for (let row = startY; row <= endY; row++) {
+            for (let col = startX; col <= endX; col++) {
+                this.grid[row][col].possibles[value] = -1;
+            }
+        }
+    }
 
     selectNumber(row, cell, value) {
 
