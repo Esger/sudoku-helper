@@ -65,9 +65,16 @@ export class GridCustomElement {
         });
     }
 
-    _sweepCol(col, value) {
-        this._possibles.forEach(rowIndex => {
-            this.grid[rowIndex][col].possibles[value] = -1;
+    _sweepCol(col, value, omitRows) {
+        this.grid.forEach((row, rowIndex) => {
+            const cell = row[col];
+            if (omitRows) {
+                if (omitRows.indexOf(rowIndex) == -1) {
+                    cell.possibles[value] = -1;
+                }
+            } else {
+                cell.possibles[value] = -1;
+            }
         });
     }
 
@@ -180,7 +187,7 @@ export class GridCustomElement {
     }
 
     _cellHasOnlyPosibilities(row, col, set) {
-        let cell = this.grid[row][col];
+        const cell = this.grid[row][col];
         let result;
         if (cell.value < 0) {
             result = cell.possibles.every(possible => {
@@ -213,7 +220,26 @@ export class GridCustomElement {
         });
     }
 
-    findColPairs() { }
+    findColPairs() {
+        this._possibles.forEach(col => {
+            this._pairs.forEach(pair => {
+                let pairCount = 0;
+                let rowsWithPairs = [];
+                this._possibles.forEach(row => {
+                    if (this._cellHasOnlyPosibilities(row, col, pair)) {
+                        pairCount++;
+                        rowsWithPairs.push(row);
+                    }
+                });
+                if (pairCount == 2) {
+                    pair.forEach(value => {
+                        this._sweepCol(col, value, rowsWithPairs);
+                        this._doBasicChecks();
+                    });
+                }
+            });
+        });
+    }
 
     findBlockPairs() { }
 
