@@ -61,7 +61,7 @@ export class GridCustomElement {
         this._sweepBlock(row, cell, value);
 
         this._bindingSignaler.signal('updatePossibles');
-        // console.log(...arguments);
+        console.log(...arguments);
 
     }
 }
