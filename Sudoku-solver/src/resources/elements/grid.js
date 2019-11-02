@@ -1,7 +1,11 @@
+import { BindingSignaler } from 'aurelia-templating-resources';
+import { inject } from 'aurelia-framework';
+
+@inject(BindingSignaler)
 export class GridCustomElement {
 
-
-    constructor() {
+    constructor(bindingSignaler) {
+        this._bindingSignaler = bindingSignaler;
         this.grid = [];
         this._possibles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     }
@@ -10,31 +14,42 @@ export class GridCustomElement {
         for (let y = 0; y < 9; y++) {
             const row = [];
             for (let x = 0; x < 9; x++) {
-                row.push({ possibles: this._possibles.slice(), value: 0 });
+                row.push({ possibles: this._possibles.slice(), value: -1 });
             }
             this.grid.push(row);
         }
     }
 
     _applyGridvalue(row, cell, value) {
-        this.grid[row][cell].value = value;
+        if (value >= 0) {
+            this.grid[row][cell].value = value;
+        }
     }
 
     _sweepRow(row, value) {
-        const theRow = this.grid[row];
-        theRow.forEach(cell => {
-            cell.possibles[value] = '';
+        this.grid[row].forEach(cell => {
+            cell.possibles[value] = -1;
         });
-        this._bindingSignaler.signal('updatePossibles');
     }
-    _sweepCol(col, value) { }
+
+    _sweepCol(col, value) {
+        for (let row = 0; row < this.grid.length; row++) {
+            this.grid[row][col].possibles[value] = -1;
+        }
+    }
+
     _sweepBlock(row, col, value) { }
 
     selectNumber(row, cell, value) {
+
         this._applyGridvalue(row, cell, value);
+
         this._sweepRow(row, value);
         this._sweepCol(cell, value);
         this._sweepBlock(row, cell, value);
-        console.log(...arguments);
+
+        this._bindingSignaler.signal('updatePossibles');
+        // console.log(...arguments);
+
     }
 }

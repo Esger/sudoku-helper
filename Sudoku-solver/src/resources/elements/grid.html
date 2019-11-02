@@ -1,18 +1,21 @@
 <template>
+
+    <require from="resources/value-converters/the-number"></require>
+
     <div class="sudokuGrid">
         <template class="row"
                   repeat.for="row of grid">
             <div class="cell 
-                        row${$parent.$index}__cell${$index}
-                        ${cell.value == 0 ? 'cell--unset' : 'cell--isSet'}"
+                    row${$parent.$index}__cell${$index}
+                    ${cell.value < 0 ? 'cell--unset' : 'cell--isSet'}"
                  repeat.for="cell of row">
-                <template if.bind="cell.value == 0">
-                    <p class="possible"
+                <template if.bind="cell.value < 0">
+                    <p class="possible possible--${(cell.possibles[$index] - 1 ) | theNumber & signal:'updatePossibles'}"
                        repeat.for="possible of cell.possibles"
-                       click.delegate="selectNumber($parent.$parent.$index,$parent.$index,possible)">${possible}</p>
+                       click.delegate="selectNumber($parent.$parent.$index,$parent.$index,cell.possibles[$index])">${cell.possibles[$index] | theNumber & signal:'updatePossibles' }</p>
                 </template>
                 <template else>
-                    <p class="possible">${cell.value}</p>
+                    <p class="possible valueSet">${cell.value + 1}</p>
                 </template>
             </div>
         </template>

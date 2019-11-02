@@ -41,6 +41,7 @@ body {
 
     &[class*='--isSet'] {
         .centerXYDefinition;
+        cursor: default;
         font-size: 3vmin;
         border-radius: 5px;
     }
@@ -58,4 +59,8 @@ body {
     .tileDefinition;
     .centerXYDefinition;
     margin: 1px;
+
+    &.possible--, &.valueSet {
+        cursor: default;
+    }
 }
