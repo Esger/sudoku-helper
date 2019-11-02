@@ -98,20 +98,85 @@ export class GridCustomElement {
         });
     }
 
+    _findUniqueRowPossibilities() {
+        this._possibles.forEach(row => {
+            this._possibles.forEach(value => {
+                let possibleCount = 0;
+                let theCol;
+                this._possibles.forEach(col => {
+                    if (this.grid[row][col].possibles[value] >= 0) {
+                        possibleCount++;
+                        theCol = col;
+                    }
+                });
+                if (possibleCount == 1) {
+                    this._applyGridvalue(row, theCol, value);
+                }
+            });
+        });
+    }
+
+    _findUniqueColPossibilities() {
+        this._possibles.forEach(col => {
+            this._possibles.forEach(value => {
+                let possibleCount = 0;
+                let theRow;
+                this._possibles.forEach(row => {
+                    if (this.grid[row][col].possibles[value] >= 0) {
+                        possibleCount++;
+                        theRow = row;
+                    }
+                });
+                if (possibleCount == 1) {
+                    this._applyGridvalue(theRow, col, value);
+                }
+            });
+        });
+    }
+
+    _findUniqueBlockPossibilities() {
+        let blocks = [0, 1, 2];
+        blocks.forEach(yBlock => {
+            blocks.forEach(xBlock => {
+                this._possibles.forEach(value => {
+                    let possibleCount = 0;
+                    let theRow, theCol;
+                    blocks.forEach(row => {
+                        blocks.forEach(col => {
+                            let thisRow = yBlock * 3 + row;
+                            let thisCol = xBlock * 3 + col;
+                            if (this.grid[thisRow][thisCol].possibles[value] >= 0) {
+                                possibleCount++;
+                                theRow = thisRow;
+                                theCol = thisCol;
+                            }
+                        });
+                    });
+                    if (possibleCount == 1) {
+                        this._applyGridvalue(theRow, theCol, value);
+                    }
+                });
+            });
+        });
+    }
+
+    _findUniquePossibilities() {
+        this._findUniqueRowPossibilities();
+        this._findUniqueColPossibilities();
+        this._findUniqueBlockPossibilities();
+    }
+
     _processGrid() {
         this._processHandleId = setInterval(() => {
-            if (this._doChecks > 0) {
+            while (this._doChecks > 0) {
                 this._findSinglePossibilities();
+                this._findUniquePossibilities();
                 this._removeCheck();
             }
         }, 1000);
     }
 
     selectNumber(row, col, value) {
-
         this._applyGridvalue(row, col, value);
-
-        // console.log(...arguments);
-
     }
 }
