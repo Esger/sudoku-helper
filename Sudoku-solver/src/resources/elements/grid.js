@@ -3,25 +3,38 @@ export class GridCustomElement {
 
     constructor() {
         this.grid = [];
-        this.possibles = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        this._possibles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     }
 
     attached() {
         for (let y = 0; y < 9; y++) {
             const row = [];
             for (let x = 0; x < 9; x++) {
-                row.push({ possibles: this.possibles.slice(), value: 0 });
+                row.push({ possibles: this._possibles.slice(), value: 0 });
             }
             this.grid.push(row);
         }
     }
 
-    applyGridNumber(row, cell, number) {
-        this.grid[row][cell].value = number;
+    _applyGridvalue(row, cell, value) {
+        this.grid[row][cell].value = value;
     }
 
-    selectNumber(row, cell, number) {
-        this.applyGridNumber(row, cell, number);
+    _sweepRow(row, value) {
+        const theRow = this.grid[row];
+        theRow.forEach(cell => {
+            cell.possibles[value] = '';
+        });
+        this._bindingSignaler.signal('updatePossibles');
+    }
+    _sweepCol(col, value) { }
+    _sweepBlock(row, col, value) { }
+
+    selectNumber(row, cell, value) {
+        this._applyGridvalue(row, cell, value);
+        this._sweepRow(row, value);
+        this._sweepCol(cell, value);
+        this._sweepBlock(row, cell, value);
         console.log(...arguments);
     }
 }
