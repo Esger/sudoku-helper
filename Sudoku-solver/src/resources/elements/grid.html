@@ -10,12 +10,12 @@
                     ${cell.value < 0 ? 'cell--unset' : 'cell--isSet'}"
                  repeat.for="cell of row">
                 <template if.bind="cell.value < 0">
-                    <p class="possible possible--${(cell.possibles[$index]) | theNumber & signal:'updatePossibles'}"
-                       repeat.for="possible of cell.possibles"
-                       click.delegate="selectNumber($parent.$parent.$index,$parent.$index,cell.possibles[$index])">${cell.possibles[$index] | theNumber & signal:'updatePossibles' }</p>
+                    <p class="candidate candidate--${(cell.candidates[$index]) | theNumber & signal:'updateCandidates'}"
+                       repeat.for="candidate of cell.candidates"
+                       click.delegate="selectNumber($parent.$parent.$index,$parent.$index,cell.candidates[$index])">${cell.candidates[$index] | theNumber & signal:'updateCandidates' }</p>
                 </template>
                 <template else>
-                    <p class="possible valueSet">${cell.value | theNumber}</p>
+                    <p class="candidate valueSet">${cell.value | theNumber}</p>
                 </template>
             </div>
         </template>

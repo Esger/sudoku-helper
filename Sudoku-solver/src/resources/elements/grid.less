@@ -63,14 +63,18 @@ body {
     margin-bottom: @blockSpacing;
 }
 
-.possible {
+.candidate {
     .tileDefinition;
     .centerXYDefinition;
     margin: 1px;
 
-    &.possible--, &.valueSet {
+    &.candidate--, &.valueSet {
         cursor: default;
         background-color: @TileColorSet;
+    }
+
+    &.candidate-- {
+        opacity: .5;
     }
 
     &.valueSet {
