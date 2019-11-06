@@ -1,0 +1,7 @@
+<template>
+    <div class="controls ${tucked ? 'tucked' : ''}">
+        <button class="button" click.delegate="resetGrid()">Reset</button>
+    </div>
+    <div click.delegate="showControls()"
+         class="hamburger ${tucked ? '' : 'tucked'}">=</div>
+</template>

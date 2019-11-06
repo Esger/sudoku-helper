@@ -1,20 +1,41 @@
 import { BindingSignaler } from 'aurelia-templating-resources';
 import { inject } from 'aurelia-framework';
+import { EventAggregator } from 'aurelia-event-aggregator';
 
-@inject(BindingSignaler)
+@inject(BindingSignaler, EventAggregator)
 export class GridCustomElement {
 
-    constructor(bindingSignaler) {
+    constructor(bindingSignaler, eventAggregator) {
         this._bindingSignaler = bindingSignaler;
+        this._eventAggregator = eventAggregator;
         this._candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         this._blocks = [0, 1, 2];
-        this._tuples = [[], [], [], [], []];
         this._doChecks = 0;
         this._processHandleId = undefined;
-        this.grid = [];
+        this._tuples = [[], [], [], [], []];
     }
 
     attached() {
+        this._resetGrid();
+        this._fillTuples();
+        this._processGrid();
+        this._addListeners();
+    }
+
+    detached() {
+        this._resetGridListener.dispose();
+        clearInterval(this._resetGridListener);
+    }
+
+    _addListeners() {
+        this._resetGridListener = this._eventAggregator.subscribe('resetGrid', _ => {
+            this._resetGrid();
+        });
+    }
+
+    _resetGrid() {
+        clearInterval(this._resetGridListener);
+        this.grid = [];
         for (let y = 0; y < 9; y++) {
             const row = [];
             for (let x = 0; x < 9; x++) {
@@ -29,13 +50,16 @@ export class GridCustomElement {
             }
             this.grid.push(row);
         }
+        this._processGrid();
+    }
+
+    _fillTuples() {
         this._candidates.forEach(val1 => {
             for (let i = val1 + 1; i < this._candidates.length; i++) {
                 let val2 = this._candidates[i];
                 this._tuples[2].push([val1, val2]);
             }
         });
-        this._processGrid();
     }
 
     _addCheck() {
