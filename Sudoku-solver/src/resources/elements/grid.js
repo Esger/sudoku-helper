@@ -13,6 +13,7 @@ export class GridCustomElement {
         this._doChecks = 0;
         this._processHandleId = undefined;
         this._tuples = [[], [], [], [], []];
+        this._setupMode = true;
     }
 
     attached() {
@@ -24,12 +25,16 @@ export class GridCustomElement {
 
     detached() {
         this._resetGridListener.dispose();
+        this._toggleSetupModeListener.dispose();
         clearInterval(this._resetGridListener);
     }
 
     _addListeners() {
         this._resetGridListener = this._eventAggregator.subscribe('resetGrid', _ => {
             this._resetGrid();
+        });
+        this._toggleSetupModeListener = this._eventAggregator.subscribe('toggleSetupMode', data => {
+            this._setupMode = data.setupMode;
         });
     }
 
@@ -86,8 +91,12 @@ export class GridCustomElement {
         this._sweepRow(row, value);
         this._sweepCol(col, value);
         this._sweepBlock(row, col, value);
-        this._bindingSignaler.signal('updateCandidates');
+        this._signalBindings();
         this._resetTuplesFound();
+    }
+
+    _signalBindings() {
+        this._bindingSignaler.signal('updateCandidates');
     }
 
     _removeCandidate(cell, value) {
@@ -281,6 +290,7 @@ export class GridCustomElement {
                 }
             });
         });
+        this._resetTuplesFound();
         return foundSome;
     }
 
@@ -307,6 +317,7 @@ export class GridCustomElement {
                 }
             });
         });
+        this._resetTuplesFound();
         return foundSome;
     }
 
@@ -340,6 +351,7 @@ export class GridCustomElement {
                 });
             });
         });
+        this._resetTuplesFound();
         return foundSome;
     }
 
@@ -361,7 +373,12 @@ export class GridCustomElement {
         }, 500);
     }
 
-    selectNumber(row, col, value) {
-        this._applyGridvalue(row, col, value);
+    selectCandidate(row, col, value) {
+        if (this._setupMode) {
+            this._applyGridvalue(row, col, value);
+        } else {
+            this._removeCandidate(this.grid[row][col], value);
+            this._signalBindings();
+        }
     }
 }

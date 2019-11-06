@@ -12,7 +12,7 @@
                 <template if.bind="cell.value < 0">
                     <p class="candidate candidate--${(cell.candidates[$index]) | theNumber & signal:'updateCandidates'}"
                        repeat.for="candidate of cell.candidates"
-                       click.delegate="selectNumber($parent.$parent.$index,$parent.$index,cell.candidates[$index])">${cell.candidates[$index] | theNumber & signal:'updateCandidates' }</p>
+                       click.delegate="selectCandidate($parent.$parent.$index,$parent.$index,cell.candidates[$index])">${cell.candidates[$index] | theNumber & signal:'updateCandidates' }</p>
                 </template>
                 <template else>
                     <p class="candidate valueSet">${cell.value | theNumber}</p>

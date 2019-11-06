@@ -1,7 +1,11 @@
 <template>
-    <div class="controls ${tucked ? 'tucked' : ''}">
-        <button class="button" click.delegate="resetGrid()">Reset</button>
-    </div>
     <div click.delegate="showControls()"
+         mouseover.delegate="showControls()"
          class="hamburger ${tucked ? '' : 'tucked'}">=</div>
+    <div class="controls ${tucked ? 'tucked' : ''}"
+         mousemove.delegate="cancelHide()">
+        <button class="button" click.delegate="resetGrid()">Reset</button>
+        <label class="label" for="setup">
+            <input type="checkbox" name="setup" id="setup" checked.bind="setupMode" change.delegate="toggleSetupMode()">Setup</label>
+    </div>
 </template>
