@@ -46,10 +46,6 @@ export class GridCustomElement {
             for (let x = 0; x < 9; x++) {
                 row.push({
                     candidates: this._candidates.slice(),
-                    tuplesFound: {
-                        2: false,
-                        3: false
-                    },
                     value: -1
                 });
             }
@@ -75,14 +71,6 @@ export class GridCustomElement {
         this._doChecks--;
     }
 
-    _resetTuplesFound() {
-        this.grid.forEach(row => {
-            row.forEach(cell => {
-                cell.tuplesFound[2] = false;
-            });
-        });
-    }
-
     _applyGridvalue(row, col, value) {
         if (value >= 0) {
             this.grid[row][col].value = value;
@@ -92,7 +80,6 @@ export class GridCustomElement {
         this._sweepCol(col, value);
         this._sweepBlock(row, col, value);
         this._signalBindings();
-        this._resetTuplesFound();
     }
 
     _signalBindings() {
@@ -102,6 +89,7 @@ export class GridCustomElement {
     _removeCandidate(cell, value) {
         if (cell.candidates[value] >= 0) {
             cell.candidates[value] = -1;
+            this._signalBindings();
             this._addCheck();
         }
     }
@@ -156,7 +144,7 @@ export class GridCustomElement {
         for (let rowIndex = startY; rowIndex <= endY; rowIndex++) {
             for (let colIndex = startX; colIndex <= endX; colIndex++) {
                 if (omit) {
-                    if (this._arrayContainsArray(omit, [rowIndex, colIndex])) {
+                    if (!this._arrayContainsArray(omit, [rowIndex, colIndex])) {
                         this._removeCandidate(this.grid[rowIndex][colIndex], value);
                     }
                 } else {
@@ -253,11 +241,10 @@ export class GridCustomElement {
         this._findUniqueBlockCandidates();
     }
 
-    _cellHasOnlyCandidates(row, col, set) {
+    _candidatesAreSubsetOfTuple(row, col, set) {
         const cell = this.grid[row][col];
-        const tuplesFoundIndex = set.length;
         let result;
-        if (cell.value < 0 && !cell.tuplesFound[tuplesFoundIndex]) {
+        if (cell.value < 0) {
             result = cell.candidates.every(candidate => {
                 return set.indexOf(candidate) >= 0 || candidate < 0;
             });
@@ -268,104 +255,82 @@ export class GridCustomElement {
     }
 
     findRowTuples(n) {
-        let foundSome = false;
-        this._candidates.forEach(row => {
-            this._tuples[n].forEach(tuple => {
-                let pairCount = 0;
-                let colsWithPairs = [];
+        this._tuples[n].forEach(tuple => {
+            this._candidates.forEach(row => {
+                let subsetCount = 0;
+                let colsWithTuples = [];
                 this._candidates.forEach(col => {
-                    if (this._cellHasOnlyCandidates(row, col, tuple)) {
-                        pairCount++;
-                        colsWithPairs.push(col);
+                    if (this._candidatesAreSubsetOfTuple(row, col, tuple)) {
+                        subsetCount++;
+                        colsWithTuples.push(col);
                     }
                 });
-                if (pairCount == 2) {
-                    foundSome = true;
-                    colsWithPairs.forEach(col => {
-                        this.grid[row][col].tuplesFound[2] = true;
-                    });
+                if (subsetCount == n) {
                     tuple.forEach(value => {
-                        this._sweepRow(row, value, colsWithPairs);
+                        this._sweepRow(row, value, colsWithTuples);
                     });
                 }
             });
         });
-        this._resetTuplesFound();
-        return foundSome;
     }
 
     findColTuples(n) {
-        let foundSome = false;
-        this._candidates.forEach(col => {
-            this._tuples[n].forEach(tuple => {
-                let pairCount = 0;
-                let rowsWithPairs = [];
+        this._tuples[n].forEach(tuple => {
+            this._candidates.forEach(col => {
+                let subsetCount = 0;
+                let rowsWithTuples = [];
                 this._candidates.forEach(row => {
-                    if (this._cellHasOnlyCandidates(row, col, tuple)) {
-                        pairCount++;
-                        rowsWithPairs.push(row);
+                    if (this._candidatesAreSubsetOfTuple(row, col, tuple)) {
+                        subsetCount++;
+                        rowsWithTuples.push(row);
                     }
                 });
-                if (pairCount == 2) {
-                    foundSome = true;
-                    rowsWithPairs.forEach(row => {
-                        this.grid[row][col].tuplesFound[2] = true;
-                    });
+                if (subsetCount == n) {
                     tuple.forEach(value => {
-                        this._sweepCol(col, value, rowsWithPairs);
+                        this._sweepCol(col, value, rowsWithTuples);
                     });
                 }
             });
         });
-        this._resetTuplesFound();
-        return foundSome;
     }
 
     findBlockTuples(n) {
-        let foundSome = false;
-        this._blocks.forEach(blockY => {
-            this._blocks.forEach(blockX => {
-                this._tuples[n].forEach(tuple => {
-                    let pairCount = 0;
-                    let cellsWithPairs = [];
+        this._tuples[n].forEach(tuple => {
+            this._blocks.forEach(blockY => {
+                this._blocks.forEach(blockX => {
+                    let tupleCount = 0;
+                    let cellsWithTuples = [];
                     let theRow, theCol;
                     this._blocks.forEach(row => {
                         theRow = blockY * 3 + row;
                         this._blocks.forEach(col => {
                             theCol = blockX * 3 + col;
-                            if (this._cellHasOnlyCandidates(theRow, theCol, tuple)) {
-                                pairCount++;
-                                cellsWithPairs.push([theRow, theCol]);
+                            if (this._candidatesAreSubsetOfTuple(theRow, theCol, tuple)) {
+                                tupleCount++;
+                                cellsWithTuples.push([theRow, theCol]);
                             }
                         });
                     });
-                    if (pairCount == 2) {
-                        foundSome = true;
-                        cellsWithPairs.forEach(cell => {
-                            this.grid[cell[0]][cell[1]].tuplesFound[2] = true;
-                        });
+                    if (tupleCount == n) {
                         tuple.forEach(value => {
-                            this._sweepBlock(theRow, theCol, value, cellsWithPairs);
+                            this._sweepBlock(theRow, theCol, value, cellsWithTuples);
                         });
                     }
                 });
             });
         });
-        this._resetTuplesFound();
-        return foundSome;
     }
 
     _findPairs() {
-        let foundSome =
-            this.findRowTuples(2) ||
-            this.findColTuples(2) ||
-            this.findBlockTuples(2);
-        if (foundSome) this._addCheck();
+        this.findRowTuples(2);
+        this.findColTuples(2);
+        this.findBlockTuples(2);
     }
 
     _processGrid() {
         this._processHandleId = setInterval(() => {
             while (this._doChecks > 0) {
+                console.log(this._doChecks);
                 this._findUniques();
                 this._findPairs();
                 this._removeCheck();
@@ -381,4 +346,5 @@ export class GridCustomElement {
             this._signalBindings();
         }
     }
+
 }
