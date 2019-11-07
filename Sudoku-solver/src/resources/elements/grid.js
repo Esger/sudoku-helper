@@ -57,10 +57,20 @@ export class GridCustomElement {
     _fillTuples() {
         this._candidates.forEach(val1 => {
             for (let i = val1 + 1; i < this._candidates.length; i++) {
-                let val2 = this._candidates[i];
+                const val2 = this._candidates[i];
                 this._tuples[2].push([val1, val2]);
+                for (let j = i + 1; j < this._candidates.length; j++) {
+                    const val3 = this._candidates[j];
+                    this._tuples[3].push([val1, val2, val3]);
+                    for (let k = j + 1; k < this._candidates.length; k++) {
+                        const val4 = this._candidates[k];
+                        this._tuples[4].push([val1, val2, val3, val4]);
+                    }
+                }
             }
         });
+        console.table(this._tuples[3]);
+        console.table(this._tuples[4]);
     }
 
     _addCheck() {
@@ -322,9 +332,11 @@ export class GridCustomElement {
     }
 
     _findPairs() {
-        this.findRowTuples(2);
-        this.findColTuples(2);
-        this.findBlockTuples(2);
+        [2, 3, 4].forEach(value => {
+            this.findRowTuples(value);
+            this.findColTuples(value);
+            this.findBlockTuples(value);
+        });
     }
 
     _processGrid() {
