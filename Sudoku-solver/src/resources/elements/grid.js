@@ -344,13 +344,14 @@ export class GridCustomElement {
 
     _processGrid() {
         this._processHandleId = setInterval(() => {
-            while (this._doChecks > 0) {
-                console.log(this._doChecks);
+            if (this._doChecks > 0) {
+                // console.log(this._doChecks);
+                this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });
                 this._findUniques();
                 this._findPairs();
                 this._removeCheck();
             }
-        }, 500);
+        }, 20);
     }
 
     selectCandidate(row, col, value) {
