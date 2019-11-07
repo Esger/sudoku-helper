@@ -1,4 +1,4 @@
-import { inject } from 'aurelia-framework';
+import { inject, bindable } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 
 @inject(EventAggregator)
@@ -9,6 +9,14 @@ export class ControlsCustomElement {
         this.tucked = true;
         this.setupMode = true;
         this.hideTimeoutHandle = undefined;
+        this.thinkingProgress = 0;
+        this._addListers();
+    }
+
+    _addListers() {
+        this._eventAggregator.subscribe('thinkingProgress', thinking => {
+            this.thinkingProgress = thinking.progress * 5;
+        });
     }
 
     showControls() {
