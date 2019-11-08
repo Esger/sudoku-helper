@@ -15,7 +15,14 @@ export class ControlsCustomElement {
 
     _addListers() {
         this._eventAggregator.subscribe('thinkingProgress', thinking => {
-            this.thinkingProgress = thinking.progress * 5;
+            if (this.thinkingProgress == 0) {
+                this.progressFactor = 0;
+            }
+            if (this.progressFactor == 0 && thinking.progress > 1) {
+                this.progressFactor = 100 / thinking.progress;
+            }
+            this.thinkingProgress = thinking.progress * this.progressFactor;
+            console.log(thinking.progress, this.thinkingProgress);
         });
     }
 

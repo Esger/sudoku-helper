@@ -19,8 +19,8 @@ export class GridCustomElement {
     attached() {
         this._resetGrid();
         this._fillTuples();
-        this._processGrid();
         this._addListeners();
+        this._processGrid();
     }
 
     detached() {
@@ -31,7 +31,9 @@ export class GridCustomElement {
 
     _addListeners() {
         this._resetGridListener = this._eventAggregator.subscribe('resetGrid', _ => {
+            clearInterval(this._resetGridListener);
             this._resetGrid();
+            this._processGrid();
         });
         this._toggleSetupModeListener = this._eventAggregator.subscribe('toggleSetupMode', data => {
             this._setupMode = data.setupMode;
@@ -39,7 +41,6 @@ export class GridCustomElement {
     }
 
     _resetGrid() {
-        clearInterval(this._resetGridListener);
         this.grid = [];
         for (let y = 0; y < 9; y++) {
             const row = [];
@@ -51,7 +52,6 @@ export class GridCustomElement {
             }
             this.grid.push(row);
         }
-        this._processGrid();
     }
 
     _fillTuples() {
@@ -73,7 +73,6 @@ export class GridCustomElement {
                 }
             }
         });
-        console.table(this._tuples[5]);
     }
 
     _addCheck() {
@@ -172,15 +171,15 @@ export class GridCustomElement {
             this._candidates.forEach(col => {
                 let candidatesCount = 0;
                 let candidates = this.grid[row][col].candidates;
-                let singlePossibility;
+                let singleCandidate;
                 candidates.forEach(candidate => {
                     if (candidate >= 0) {
-                        singlePossibility = candidate;
+                        singleCandidate = candidate;
                         candidatesCount++;
                     }
                 });
                 if (candidatesCount == 1) {
-                    this._applyGridvalue(row, col, singlePossibility);
+                    this._applyGridvalue(row, col, singleCandidate);
                 }
             });
         });
@@ -345,11 +344,10 @@ export class GridCustomElement {
     _processGrid() {
         this._processHandleId = setInterval(() => {
             if (this._doChecks > 0) {
-                // console.log(this._doChecks);
-                this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });
                 this._findUniques();
                 this._findPairs();
                 this._removeCheck();
+                this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });
             }
         }, 20);
     }
