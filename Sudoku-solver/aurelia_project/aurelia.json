@@ -1,5 +1,5 @@
 {
-    "name": "Sudoku-solver",
+    "name": "Sudoku-helper",
     "type": "project:application",
     "platform": {
         "id": "web",
