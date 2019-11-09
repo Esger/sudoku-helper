@@ -22,7 +22,6 @@ export class ControlsCustomElement {
                 this.progressFactor = 100 / thinking.progress;
             }
             this.thinkingProgress = thinking.progress * this.progressFactor;
-            console.log(thinking.progress, this.thinkingProgress);
         });
     }
 
