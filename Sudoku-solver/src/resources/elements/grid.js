@@ -1,60 +1,43 @@
 import { BindingSignaler } from 'aurelia-templating-resources';
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
+import { CandidatesService } from 'resources/services/candidates-service';
 
-@inject(BindingSignaler, EventAggregator)
+@inject(BindingSignaler, EventAggregator, CandidatesService)
 export class GridCustomElement {
 
-    constructor(bindingSignaler, eventAggregator) {
+    constructor(bindingSignaler, eventAggregator, candidatesService) {
         this._bindingSignaler = bindingSignaler;
         this._eventAggregator = eventAggregator;
+        this._candidatesService = candidatesService;
         this._candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         this._blocks = [0, 1, 2];
         this._doChecks = 0;
         this._processHandleId = undefined;
         this._tuples = [[], [], [], [], [], []];
-        this._setupMode = true;
+        this.grid = this._candidates.map(row => this._candidates);
     }
 
     attached() {
-        this._resetGrid();
         this._fillTuples();
         this._addListeners();
         this._processGrid();
     }
 
     detached() {
-        this._resetGridListener.dispose();
-        this._toggleSetupModeListener.dispose();
+        this._cellValueSetSubscriber.dispose();
+        this._cellCandidatesSubscriber.dispose();
         clearInterval(this._resetGridListener);
     }
 
     _addListeners() {
-        this._resetGridListener = this._eventAggregator.subscribe('resetGrid', _ => {
-            clearInterval(this._resetGridListener);
-            this._resetGrid();
-            this._processGrid();
+        this._cellValueSetSubscriber = this._eventAggregator.subscribe('cellValueSet', _ => {
+            this._addCheck();
         });
-        this._toggleSetupModeListener = this._eventAggregator.subscribe('toggleSetupMode', data => {
-            this._setupMode = data.setupMode;
-        });
-    }
-
-    _resetGrid() {
-        this.grid = [];
-        for (let y = 0; y < 9; y++) {
-            const row = [];
-            for (let x = 0; x < 9; x++) {
-                row.push({
-                    candidates: this._candidates.slice(),
-                    value: -1
-                });
-            }
-            this.grid.push(row);
-        }
     }
 
     _fillTuples() {
+        // .map() gebruiken?
         this._candidates.forEach(val1 => {
             for (let i = val1 + 1; i < this._candidates.length; i++) {
                 const val2 = this._candidates[i];
@@ -84,56 +67,17 @@ export class GridCustomElement {
     }
 
     _applyGridvalue(row, col, value) {
-        if (value >= 0) {
-            this.grid[row][col].value = value;
-        }
-        this._sweepSelf(row, col);
-        this._sweepRow(row, value);
-        this._sweepCol(col, value);
-        this._sweepBlock(row, col, value);
-        this._signalBindings();
+        this._signalCellValueFound(row, col, value);
+        // this._sweepRow(row, value);
+        // this._sweepCol(col, value);
+        // this._sweepBlock(row, col, value);
     }
 
-    _signalBindings() {
-        this._bindingSignaler.signal('updateCandidates');
-    }
-
-    _removeCandidate(cell, value) {
-        if (cell.candidates[value] >= 0) {
-            cell.candidates[value] = -1;
-            this._signalBindings();
-            this._addCheck();
-        }
-    }
-
-    _sweepSelf(row, col) {
-        this.grid[row][col].candidates.forEach((p, i, candidates) => {
-            candidates[i] = -1;
-        });
-    }
-
-    _sweepRow(row, value, omitCols) {
-        this.grid[row].forEach((cell, index) => {
-            if (omitCols) {
-                if (omitCols.indexOf(index) == -1) {
-                    this._removeCandidate(cell, value);
-                }
-            } else {
-                this._removeCandidate(cell, value);
-            }
-        });
-    }
-
-    _sweepCol(col, value, omitRows) {
-        this.grid.forEach((row, rowIndex) => {
-            const cell = row[col];
-            if (omitRows) {
-                if (omitRows.indexOf(rowIndex) == -1) {
-                    this._removeCandidate(cell, value);
-                }
-            } else {
-                this._removeCandidate(cell, value);
-            }
+    _signalCellValueFound(row, col, value) {
+        this._eventAggregator.publish('setCellValue', {
+            row: row,
+            col: col,
+            value: value
         });
     }
 
@@ -146,61 +90,15 @@ export class GridCustomElement {
         return result;
     }
 
-    _sweepBlock(row, col, value, omit) {
-        let blockY = Math.floor(row / 3);
-        let blockX = Math.floor(col / 3);
-        let startY = blockY * 3;
-        let endY = startY + 2;
-        let startX = blockX * 3;
-        let endX = startX + 2;
-        for (let rowIndex = startY; rowIndex <= endY; rowIndex++) {
-            for (let colIndex = startX; colIndex <= endX; colIndex++) {
-                if (omit) {
-                    if (!this._arrayContainsArray(omit, [rowIndex, colIndex])) {
-                        this._removeCandidate(this.grid[rowIndex][colIndex], value);
-                    }
-                } else {
-                    this._removeCandidate(this.grid[rowIndex][colIndex], value);
-                }
-            }
-        }
-    }
-
-    _findSingleCandidates() {
-        this._candidates.forEach(row => {
-            this._candidates.forEach(col => {
-                let candidatesCount = 0;
-                let candidates = this.grid[row][col].candidates;
-                let singleCandidate;
-                candidates.forEach(candidate => {
-                    if (candidate >= 0) {
-                        singleCandidate = candidate;
-                        candidatesCount++;
-                    }
-                });
-                if (candidatesCount == 1) {
-                    this._applyGridvalue(row, col, singleCandidate);
-                }
-            });
-        });
+    _pollCandidates() {
+        this._eventAggregator.publish('pollCandidates');
     }
 
     _findUniqueRowCandidates() {
-        this._candidates.forEach(row => {
-            this._candidates.forEach(value => {
-                let candidateCount = 0;
-                let theCol;
-                this._candidates.forEach(col => {
-                    if (this.grid[row][col].candidates[value] >= 0) {
-                        candidateCount++;
-                        theCol = col;
-                    }
-                });
-                if (candidateCount == 1) {
-                    this._applyGridvalue(row, theCol, value);
-                }
-            });
-        });
+        // let cells = this._candidatesService.findUniqueRowCandidates();
+        // cells.forEach(cell => {
+        //     this._signalCellValueFound(cell.row, cell.col, cell.value);
+        // });
     }
 
     _findUniqueColCandidates() {
@@ -247,10 +145,9 @@ export class GridCustomElement {
     }
 
     _findUniques() {
-        this._findSingleCandidates();
         this._findUniqueRowCandidates();
-        this._findUniqueColCandidates();
-        this._findUniqueBlockCandidates();
+        // this._findUniqueColCandidates();
+        // this._findUniqueBlockCandidates();
     }
 
     _candidatesAreSubsetOfTuple(row, col, set) {
@@ -345,20 +242,11 @@ export class GridCustomElement {
         this._processHandleId = setInterval(() => {
             if (this._doChecks > 0) {
                 this._findUniques();
-                this._findPairs();
+                // this._findPairs();
                 this._removeCheck();
                 this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });
             }
-        }, 20);
-    }
-
-    selectCandidate(row, col, value) {
-        if (this._setupMode) {
-            this._applyGridvalue(row, col, value);
-        } else {
-            this._removeCandidate(this.grid[row][col], value);
-            this._signalBindings();
-        }
+        }, 100);
     }
 
 }

@@ -53,7 +53,8 @@
         "elements": "src/resources/elements",
         "attributes": "src/resources/attributes",
         "valueConverters": "src/resources/value-converters",
-        "bindingBehaviors": "src/resources/binding-behaviors"
+        "bindingBehaviors": "src/resources/binding-behaviors",
+        "services": "src/resources/services"
     },
     "testFramework": {
         "id": "jasmine",

@@ -12,9 +12,15 @@
          mousemove.delegate="cancelHide()">
 
         <label class="label" for="setup">
-             <input type="checkbox" name="setup" id="setup" checked.bind="setupMode" change.delegate="toggleSetupMode()">Setup</label>
+             <input type="checkbox" 
+                    name="setup" 
+                    id="setup" 
+                    checked.bind="setupMode" 
+                    change.delegate="toggleSetupMode()">Setup</label>
 
-        <button class="button" click.delegate="resetGrid()">Reset</button>
+        <button class="button"
+                click.delegate="resetGrid()"
+                touchstart.delegate="resetGrid()">Reset</button>
 
     </div>
 

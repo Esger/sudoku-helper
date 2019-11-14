@@ -10,10 +10,10 @@ export class ControlsCustomElement {
         this.setupMode = true;
         this.hideTimeoutHandle = undefined;
         this.thinkingProgress = 0;
-        this._addListers();
+        this._addListeners();
     }
 
-    _addListers() {
+    _addListeners() {
         this._eventAggregator.subscribe('thinkingProgress', thinking => {
             if (this.thinkingProgress == 0) {
                 this.progressFactor = 0;
