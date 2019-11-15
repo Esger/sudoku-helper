@@ -26,12 +26,15 @@ export class GridCustomElement {
 
     detached() {
         this._cellValueSetSubscriber.dispose();
-        this._cellCandidatesSubscriber.dispose();
+        this._candidateRemovedSubscriber.dispose();
         clearInterval(this._resetGridListener);
     }
 
     _addListeners() {
         this._cellValueSetSubscriber = this._eventAggregator.subscribe('cellValueSet', _ => {
+            this._addCheck();
+        });
+        this._candidateRemovedSubscriber = this._eventAggregator.subscribe('candidateRemoved', _ => {
             this._addCheck();
         });
     }
@@ -95,53 +98,53 @@ export class GridCustomElement {
     }
 
     _findUniqueRowCandidates() {
-        // let cells = this._candidatesService.findUniqueRowCandidates();
-        // cells.forEach(cell => {
-        //     this._signalCellValueFound(cell.row, cell.col, cell.value);
-        // });
+        let cells = this._candidatesService.findUniqueRowCandidates();
+        cells.forEach(cell => {
+            this._signalCellValueFound(cell.row, cell.col, cell.value);
+        });
     }
 
     _findUniqueColCandidates() {
-        this._candidates.forEach(col => {
-            this._candidates.forEach(value => {
-                let candidateCount = 0;
-                let theRow;
-                this._candidates.forEach(row => {
-                    if (this.grid[row][col].candidates[value] >= 0) {
-                        candidateCount++;
-                        theRow = row;
-                    }
-                });
-                if (candidateCount == 1) {
-                    this._applyGridvalue(theRow, col, value);
-                }
-            });
-        });
+        // this._candidates.forEach(col => {
+        //     this._candidates.forEach(value => {
+        //         let candidateCount = 0;
+        //         let theRow;
+        //         this._candidates.forEach(row => {
+        //             if (this.grid[row][col].candidates[value] >= 0) {
+        //                 candidateCount++;
+        //                 theRow = row;
+        //             }
+        //         });
+        //         if (candidateCount == 1) {
+        //             this._applyGridvalue(theRow, col, value);
+        //         }
+        //     });
+        // });
     }
 
     _findUniqueBlockCandidates() {
-        this._blocks.forEach(yBlock => {
-            this._blocks.forEach(xBlock => {
-                this._candidates.forEach(value => {
-                    let candidateCount = 0;
-                    let theRow, theCol;
-                    this._blocks.forEach(row => {
-                        this._blocks.forEach(col => {
-                            let thisRow = yBlock * 3 + row;
-                            let thisCol = xBlock * 3 + col;
-                            if (this.grid[thisRow][thisCol].candidates[value] >= 0) {
-                                candidateCount++;
-                                theRow = thisRow;
-                                theCol = thisCol;
-                            }
-                        });
-                    });
-                    if (candidateCount == 1) {
-                        this._applyGridvalue(theRow, theCol, value);
-                    }
-                });
-            });
-        });
+        // this._blocks.forEach(yBlock => {
+        //     this._blocks.forEach(xBlock => {
+        //         this._candidates.forEach(value => {
+        //             let candidateCount = 0;
+        //             let theRow, theCol;
+        //             this._blocks.forEach(row => {
+        //                 this._blocks.forEach(col => {
+        //                     let thisRow = yBlock * 3 + row;
+        //                     let thisCol = xBlock * 3 + col;
+        //                     if (this.grid[thisRow][thisCol].candidates[value] >= 0) {
+        //                         candidateCount++;
+        //                         theRow = thisRow;
+        //                         theCol = thisCol;
+        //                     }
+        //                 });
+        //             });
+        //             if (candidateCount == 1) {
+        //                 this._applyGridvalue(theRow, theCol, value);
+        //             }
+        //         });
+        //     });
+        // });
     }
 
     _findUniques() {
@@ -241,7 +244,7 @@ export class GridCustomElement {
     _processGrid() {
         this._processHandleId = setInterval(() => {
             if (this._doChecks > 0) {
-                this._findUniques();
+                // this._findUniques();
                 // this._findPairs();
                 this._removeCheck();
                 this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });

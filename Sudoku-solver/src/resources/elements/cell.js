@@ -40,11 +40,11 @@ export class CellCustomElement {
             }
         });
 
-        this._cellValueSetSubscriber = this._eventAggregator.subscribe('cellValueSet', data => {
-            if (data.row == this.row ||
-                data.col == this.col ||
-                this._inThisBlock(data.row, data.col)) {
-                this._removeCandidate(data.value);
+        this._cellValueSetSubscriber = this._eventAggregator.subscribe('cellValueSet', cell => {
+            if (cell.row == this.row ||
+                cell.col == this.col ||
+                this._inThisBlock(cell.row, cell.col)) {
+                this._removeCandidate(cell.value);
             }
         });
     }
@@ -70,14 +70,19 @@ export class CellCustomElement {
         this._signalBindings();
     }
 
-    _registerCell() {
-        this._candidatesService.registerCell({
+    _getCell() {
+        return {
+            value: this.value,
             row: this.row,
             col: this.col,
             rowBlock: this._rowBlock,
             colBlock: this._colBlock,
             candidates: this.candidates
-        });
+        };
+    }
+
+    _registerCell() {
+        this._candidatesService.registerCell(this._getCell());
     }
 
     _signalBindings() {
@@ -93,16 +98,20 @@ export class CellCustomElement {
             this._index2Block(col) == this._colBlock;
     }
 
+    _removeCandidate(value) {
+        if (this.candidates[value] >= 0) {
+            this.candidates[value] = -1;
+            this._eventAggregator.publish('candidateRemoved');
+            this._signalBindings();
+            this._singleCandidateCheck();
+        }
+    }
+
     _applyGridvalue(value) {
         if (this.value < 0) {
             this.value = value;
             this.candidates = this.candidates.map(value => -1);
-            this._registerCell();
-            this._eventAggregator.publish('cellValueSet', {
-                row: this.row,
-                col: this.col,
-                value: this.value
-            });
+            this._eventAggregator.publish('cellValueSet', this._getCell());
         }
     }
 
@@ -115,11 +124,4 @@ export class CellCustomElement {
         }
     }
 
-    _removeCandidate(value) {
-        if (this.candidates[value] >= 0) {
-            this.candidates[value] = -1;
-            this._signalBindings();
-            this._singleCandidateCheck();
-        }
-    }
 }

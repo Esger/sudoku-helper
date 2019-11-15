@@ -19,9 +19,6 @@ export class CandidatesService {
         this._cols = this._newGrid();
         this._rows = this._newGrid();
         this._blocks = this._newGrid();
-        // this._rows = this._candidates.map(row => row = this._candidates.slice());
-        // this._cols = this._candidates.map(col => col = this._candidates.slice());
-        // this._blocks = this._candidates.map(block => block = this._candidates.slice());
         setTimeout(() => {
             console.table(this._cols[0]);
         }, 5000);
@@ -42,17 +39,14 @@ export class CandidatesService {
     }
 
     findUniqueCandidates(cells) {
-        let theCells = [];
+        const theCells = [];
         this._candidates.forEach(value => {
             let theCell;
             let candidateCount = 0;
-            cells.forEach((candidates, index) => {
-                if (candidates.indexOf(value) >= 0) {
+            cells.forEach(cell => {
+                if (cell.candidates.indexOf(value) >= 0) {
                     candidateCount++;
-                    theCell = {
-                        value: value,
-                        index: index
-                    };
+                    theCell = cell;
                 }
             });
             if (candidateCount == 1) {
