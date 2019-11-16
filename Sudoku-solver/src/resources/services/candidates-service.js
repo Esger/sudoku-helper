@@ -28,11 +28,15 @@ export class CandidatesService {
     }
 
     registerCell(cell) {
-        let blockIndex = cell.rowBlock * 3 + cell.colBlock;
-        let blockCellIndex = (cell.row % 3) * 3 + (cell.col % 3);
+        let row = cell.props.row;
+        let col = cell.props.col;
+        let rowBlock = cell.props.rowBlock;
+        let colBlock = cell.props.colBlock;
+        let blockIndex = rowBlock * 3 + colBlock;
+        let blockCellIndex = (row % 3) * 3 + (col % 3);
         this._blocks[blockIndex][blockCellIndex] = cell;
-        this._rows[cell.row][cell.col] = cell;
-        this._cols[cell.col][cell.row] = cell;
+        this._rows[row][col] = cell;
+        this._cols[col][row] = cell;
     }
 
     findUniqueCandidates(cells) {
@@ -46,8 +50,8 @@ export class CandidatesService {
                     theCell = cell;
                 }
             });
-            if (theCell && !theCell.newValue && candidateCount == 1) {
-                theCell.newValue = candidate;
+            if (theCell && !theCell.props.newValue && candidateCount == 1) {
+                theCell.props.newValue = candidate;
                 theCells.push(theCell);
             }
         });

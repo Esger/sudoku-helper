@@ -18,8 +18,13 @@ export class CellCustomElement {
 
     attached() {
 
-        this._rowBlock = this._index2Block(this.row);
-        this._colBlock = this._index2Block(this.col);
+        this.props = {
+            value: this.value,
+            row: this.row,
+            col: this.col,
+            rowBlock: this._index2Block(this.row),
+            colBlock: this._index2Block(this.col)
+        };
 
         this._registerCell();
 
@@ -32,16 +37,16 @@ export class CellCustomElement {
         });
 
         this._sweepselfSubscriber = this._eventAggregator.subscribe('setCellValue', cell => {
-            if (cell.row == this.row && cell.col == this.col) {
-                this._applyGridvalue(cell.newValue);
+            if (cell.props.row == this.row && cell.props.col == this.col) {
+                this._applyGridvalue(cell.props.newValue);
             }
         });
 
         this._cellValueSetSubscriber = this._eventAggregator.subscribe('wipeRowColBlock', cell => {
-            if (cell.row == this.row ||
-                cell.col == this.col ||
-                this._inThisBlock(cell.row, cell.col)) {
-                this._removeCandidate(cell.value);
+            if (cell.props.row == this.row ||
+                cell.props.col == this.col ||
+                this._inThisBlock(cell.props.row, cell.props.col)) {
+                this._removeCandidate(cell.props.value);
             }
         });
     }
@@ -69,11 +74,7 @@ export class CellCustomElement {
 
     _getCell() {
         return {
-            value: this.value,
-            row: this.row,
-            col: this.col,
-            rowBlock: this._rowBlock,
-            colBlock: this._colBlock,
+            props: this.props,
             candidates: this.candidates
         };
     }
@@ -95,8 +96,8 @@ export class CellCustomElement {
     }
 
     _inThisBlock(row, col) {
-        return this._index2Block(row) == this._rowBlock &&
-            this._index2Block(col) == this._colBlock;
+        return this._index2Block(row) == this.props.rowBlock &&
+            this._index2Block(col) == this.props.colBlock;
     }
 
     _removeCandidate(value) {
@@ -115,9 +116,9 @@ export class CellCustomElement {
                 candidates[i] = -1;
             });
             this.value = value;
+            this.props.value = value;
             this._addCheck();
             this._eventAggregator.publish('wipeRowColBlock', this._getCell());
-            console.table(this._candidatesService._rows[0].flat());
         }
     }
 
