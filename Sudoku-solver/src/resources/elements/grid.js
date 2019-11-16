@@ -65,10 +65,6 @@ export class GridCustomElement {
         this._doChecks--;
     }
 
-    _signalCellValueFound(cell) {
-        this._eventAggregator.publish('setCellValue', cell);
-    }
-
     _arrayContainsArray(searchArray, findArray) {
         let result = searchArray.some(element => {
             return element.every((value, index) => {
@@ -78,64 +74,15 @@ export class GridCustomElement {
         return result;
     }
 
-    _pollCandidates() {
-        this._eventAggregator.publish('pollCandidates');
-    }
-
-    _findUniqueRowCandidates() {
-        let cells = this._candidatesService.findUniqueRowCandidates();
+    _signalCellValuesFound(cells) {
         cells.forEach(cell => {
-            this._signalCellValueFound(cell);
+            this._eventAggregator.publish('setCellValue', cell);
         });
     }
 
-    _findUniqueColCandidates() {
-        // this._candidates.forEach(col => {
-        //     this._candidates.forEach(value => {
-        //         let candidateCount = 0;
-        //         let theRow;
-        //         this._candidates.forEach(row => {
-        //             if (this.grid[row][col].candidates[value] >= 0) {
-        //                 candidateCount++;
-        //                 theRow = row;
-        //             }
-        //         });
-        //         if (candidateCount == 1) {
-        //             this._applyGridvalue(theRow, col, value);
-        //         }
-        //     });
-        // });
-    }
-
-    _findUniqueBlockCandidates() {
-        // this._blocks.forEach(yBlock => {
-        //     this._blocks.forEach(xBlock => {
-        //         this._candidates.forEach(value => {
-        //             let candidateCount = 0;
-        //             let theRow, theCol;
-        //             this._blocks.forEach(row => {
-        //                 this._blocks.forEach(col => {
-        //                     let thisRow = yBlock * 3 + row;
-        //                     let thisCol = xBlock * 3 + col;
-        //                     if (this.grid[thisRow][thisCol].candidates[value] >= 0) {
-        //                         candidateCount++;
-        //                         theRow = thisRow;
-        //                         theCol = thisCol;
-        //                     }
-        //                 });
-        //             });
-        //             if (candidateCount == 1) {
-        //                 this._applyGridvalue(theRow, theCol, value);
-        //             }
-        //         });
-        //     });
-        // });
-    }
-
     _findUniques() {
-        this._findUniqueRowCandidates();
-        // this._findUniqueColCandidates();
-        // this._findUniqueBlockCandidates();
+        let cells = this._candidatesService.findUniqueRowColBlockCandidates();
+        this._signalCellValuesFound(cells);
     }
 
     _candidatesAreSubsetOfTuple(row, col, set) {

@@ -58,10 +58,16 @@ export class CandidatesService {
         return theCells;
     }
 
-    findUniqueRowCandidates() {
+    findUniqueRowColBlockCandidates() {
         let cells = [];
         this._rows.forEach(row => {
             cells = cells.concat(this.findUniqueCandidates(row));
+        });
+        this._cols.forEach(col => {
+            cells = cells.concat(this.findUniqueCandidates(col));
+        });
+        this._blocks.forEach(block => {
+            cells = cells.concat(this.findUniqueCandidates(block));
         });
         return cells;
     }
