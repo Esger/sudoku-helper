@@ -2,7 +2,7 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 import { inject } from 'aurelia-framework';
 
 @inject(EventAggregator)
-export class CandidatesService {
+export class GridService {
 
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;

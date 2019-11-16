@@ -1,20 +1,25 @@
 import { BindingSignaler } from 'aurelia-templating-resources';
 import { inject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
-import { CandidatesService } from 'resources/services/candidates-service';
+import { GridService } from 'resources/services/grid-service';
 
-@inject(BindingSignaler, EventAggregator, CandidatesService)
+@inject(BindingSignaler, EventAggregator, GridService)
 export class GridCustomElement {
 
-    constructor(bindingSignaler, eventAggregator, candidatesService) {
+    constructor(bindingSignaler, eventAggregator, gridService) {
         this._bindingSignaler = bindingSignaler;
         this._eventAggregator = eventAggregator;
-        this._candidatesService = candidatesService;
+        this._candidatesService = gridService;
         this._candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         this._blocks = [0, 1, 2];
         this._doChecks = 0;
         this._processHandleId = undefined;
         this._tuples = [[], [], [], [], [], []];
+        this._statuses = {
+            initial: 'lightslategrey',
+            solver: 'green',
+            error: 'crimsonred'
+        };
         this.grid = this._candidates.map(row => this._candidates);
     }
 
@@ -181,7 +186,7 @@ export class GridCustomElement {
                 this._removeCheck();
                 this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });
             }
-        }, 100);
+        }, 200);
     }
 
 }

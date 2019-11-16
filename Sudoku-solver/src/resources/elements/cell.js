@@ -1,17 +1,17 @@
 import { BindingSignaler } from 'aurelia-templating-resources';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { inject, bindable } from 'aurelia-framework';
-import { CandidatesService } from 'resources/services/candidates-service';
+import { GridService } from 'resources/services/grid-service';
 
-@inject(BindingSignaler, EventAggregator, CandidatesService)
+@inject(BindingSignaler, EventAggregator, GridService)
 export class CellCustomElement {
 
     @bindable row
     @bindable col
-    constructor(bindingSignaler, eventAggregator, candidatesService) {
+    constructor(bindingSignaler, eventAggregator, gridService) {
         this._bindingSignaler = bindingSignaler;
         this._eventAggregator = eventAggregator;
-        this._candidatesService = candidatesService;
+        this._candidatesService = gridService;
         this._setupMode = true;
         this._reset();
     }
