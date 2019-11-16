@@ -16,9 +16,6 @@ export class CellCustomElement {
         this._reset();
     }
 
-    bind() {
-    }
-
     attached() {
 
         this._rowBlock = this._index2Block(this.row);
@@ -34,13 +31,13 @@ export class CellCustomElement {
             this._setupMode = data.setupMode;
         });
 
-        this._sweepselfSubscriber = this._eventAggregator.subscribe('setCellValue', data => {
-            if (data.row == this.row && data.col == this.col) {
-                this._applyGridvalue(data.value);
+        this._sweepselfSubscriber = this._eventAggregator.subscribe('setCellValue', cell => {
+            if (cell.row == this.row && cell.col == this.col) {
+                this._applyGridvalue(cell.newValue);
             }
         });
 
-        this._cellValueSetSubscriber = this._eventAggregator.subscribe('cellValueSet', cell => {
+        this._cellValueSetSubscriber = this._eventAggregator.subscribe('wipeRowColBlock', cell => {
             if (cell.row == this.row ||
                 cell.col == this.col ||
                 this._inThisBlock(cell.row, cell.col)) {
@@ -89,6 +86,10 @@ export class CellCustomElement {
         this._bindingSignaler.signal('updateCandidates');
     }
 
+    _addCheck() {
+        this._eventAggregator.publish('addCheck');
+    }
+
     _index2Block(index) {
         return Math.floor(index / 3);
     }
@@ -102,6 +103,7 @@ export class CellCustomElement {
         if (this.candidates[value] >= 0) {
             this.candidates[value] = -1;
             this._eventAggregator.publish('candidateRemoved');
+            this._addCheck();
             this._signalBindings();
             this._singleCandidateCheck();
         }
@@ -109,9 +111,13 @@ export class CellCustomElement {
 
     _applyGridvalue(value) {
         if (this.value < 0) {
+            this.candidates.forEach((candidate, i, candidates) => {
+                candidates[i] = -1;
+            });
             this.value = value;
-            this.candidates = this.candidates.map(value => -1);
-            this._eventAggregator.publish('cellValueSet', this._getCell());
+            this._addCheck();
+            this._eventAggregator.publish('wipeRowColBlock', this._getCell());
+            console.table(this._candidatesService._rows[0].flat());
         }
     }
 

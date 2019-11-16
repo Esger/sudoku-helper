@@ -26,15 +26,11 @@ export class GridCustomElement {
 
     detached() {
         this._cellValueSetSubscriber.dispose();
-        this._candidateRemovedSubscriber.dispose();
         clearInterval(this._resetGridListener);
     }
 
     _addListeners() {
-        this._cellValueSetSubscriber = this._eventAggregator.subscribe('cellValueSet', _ => {
-            this._addCheck();
-        });
-        this._candidateRemovedSubscriber = this._eventAggregator.subscribe('candidateRemoved', _ => {
+        this._cellValueSetSubscriber = this._eventAggregator.subscribe('addCheck', _ => {
             this._addCheck();
         });
     }
@@ -62,26 +58,15 @@ export class GridCustomElement {
     }
 
     _addCheck() {
-        this._doChecks++;
+        this._doChecks = 1;
     }
 
     _removeCheck() {
         this._doChecks--;
     }
 
-    _applyGridvalue(row, col, value) {
-        this._signalCellValueFound(row, col, value);
-        // this._sweepRow(row, value);
-        // this._sweepCol(col, value);
-        // this._sweepBlock(row, col, value);
-    }
-
-    _signalCellValueFound(row, col, value) {
-        this._eventAggregator.publish('setCellValue', {
-            row: row,
-            col: col,
-            value: value
-        });
+    _signalCellValueFound(cell) {
+        this._eventAggregator.publish('setCellValue', cell);
     }
 
     _arrayContainsArray(searchArray, findArray) {
@@ -100,7 +85,7 @@ export class GridCustomElement {
     _findUniqueRowCandidates() {
         let cells = this._candidatesService.findUniqueRowCandidates();
         cells.forEach(cell => {
-            this._signalCellValueFound(cell.row, cell.col, cell.value);
+            this._signalCellValueFound(cell);
         });
     }
 
@@ -244,7 +229,7 @@ export class GridCustomElement {
     _processGrid() {
         this._processHandleId = setInterval(() => {
             if (this._doChecks > 0) {
-                // this._findUniques();
+                this._findUniques();
                 // this._findPairs();
                 this._removeCheck();
                 this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });
