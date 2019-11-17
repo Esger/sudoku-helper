@@ -9,17 +9,12 @@ export class GridCustomElement {
     constructor(bindingSignaler, eventAggregator, gridService) {
         this._bindingSignaler = bindingSignaler;
         this._eventAggregator = eventAggregator;
-        this._candidatesService = gridService;
+        this._gridService = gridService;
         this._candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         this._blocks = [0, 1, 2];
         this._doChecks = 0;
         this._processHandleId = undefined;
         this._tuples = [[], [], [], [], [], []];
-        this._statuses = {
-            initial: 'lightslategrey',
-            solver: 'green',
-            error: 'crimsonred'
-        };
         this.grid = this._candidates.map(row => this._candidates);
     }
 
@@ -86,7 +81,7 @@ export class GridCustomElement {
     }
 
     _findUniques() {
-        let cells = this._candidatesService.findUniqueRowColBlockCandidates();
+        let cells = this._gridService.findUniqueRowColBlockCandidates();
         this._signalCellValuesFound(cells);
     }
 
@@ -185,6 +180,7 @@ export class GridCustomElement {
                 // this._findPairs();
                 this._removeCheck();
                 this._eventAggregator.publish('thinkingProgress', { progress: this._doChecks });
+                this._gridService.getStatus();
             }
         }, 200);
     }

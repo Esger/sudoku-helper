@@ -11,22 +11,13 @@ export class CellCustomElement {
     constructor(bindingSignaler, eventAggregator, gridService) {
         this._bindingSignaler = bindingSignaler;
         this._eventAggregator = eventAggregator;
-        this._candidatesService = gridService;
+        this._gridService = gridService;
         this._setupMode = true;
-        this._reset();
     }
 
     attached() {
 
-        this.props = {
-            value: this.value,
-            row: this.row,
-            col: this.col,
-            rowBlock: this._index2Block(this.row),
-            colBlock: this._index2Block(this.col)
-        };
-
-        this._registerCell();
+        this._reset();
 
         this._resetListener = this._eventAggregator.subscribe('resetGrid', _ => {
             this._reset();
@@ -66,9 +57,21 @@ export class CellCustomElement {
         }
     }
 
-    _reset() {
+    _setProps() {
         this.candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         this.value = -1;
+        this.props = {
+            value: this.value,
+            row: this.row,
+            col: this.col,
+            rowBlock: this._index2Block(this.row),
+            colBlock: this._index2Block(this.col)
+        };
+    }
+
+    _reset() {
+        this._setProps();
+        this._registerCell();
         this._signalBindings();
     }
 
@@ -80,7 +83,7 @@ export class CellCustomElement {
     }
 
     _registerCell() {
-        this._candidatesService.registerCell(this._getCell());
+        this._gridService.registerCell(this._getCell());
     }
 
     _signalBindings() {
