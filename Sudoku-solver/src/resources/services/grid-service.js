@@ -7,9 +7,8 @@ export class GridService {
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
         this._candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        // this._eventAggregator.subscribe('resetGrid', _ => {
-        //     this.reset();
-        // });
+        this._tuples = [[], [], [], [], [], []];
+        this._fillTuples();
         this.reset();
     }
 
@@ -26,6 +25,28 @@ export class GridService {
         // create empty 9 x 9 array of empty objects
         let cellsSets = this._candidates.map(row => row = this._cells.slice());
         return cellsSets;
+    }
+
+    _fillTuples() {
+        // .map() gebruiken?
+        this._candidates.forEach(val1 => {
+            for (let i = val1 + 1; i < this._candidates.length; i++) {
+                const val2 = this._candidates[i];
+                this._tuples[2].push([val1, val2]);
+                for (let j = i + 1; j < this._candidates.length; j++) {
+                    const val3 = this._candidates[j];
+                    this._tuples[3].push([val1, val2, val3]);
+                    for (let k = j + 1; k < this._candidates.length; k++) {
+                        const val4 = this._candidates[k];
+                        this._tuples[4].push([val1, val2, val3, val4]);
+                        for (let j = k + 1; j < this._candidates.length; j++) {
+                            const val5 = this._candidates[j];
+                            this._tuples[5].push([val1, val2, val3, val4, val5]);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     registerCell(cell) {
@@ -111,4 +132,50 @@ export class GridService {
         });
         return cells;
     }
+
+    _candidatesContainTuple(cell, tuple) {
+        let result;
+        if (cell.props.value < 0) {
+            // use .some for subset
+            result = tuple.every(value => {
+                let result = (cell.candidates.indexOf(value) >= 0);
+                return result;
+            });
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    _candidatesCount(cell) {
+        let candidateCount = cell.candidates.filter(candidate => candidate >= 0).length;
+        return candidateCount;
+    }
+
+    findTuples(dimension, nTuple) {
+        let cells, tuples = [];
+        switch (dimension) {
+            case 'rows': cells = this._rows; break;
+            case 'cols': cells = this._cols; break;
+            case 'blocks': cells = this._blocks; break;
+        }
+
+        this._tuples[nTuple].forEach(tuple => {
+            cells.forEach(area => {
+                let cellsSetsWithTuples = [];
+                area.forEach(cell => {
+                    if (this._candidatesContainTuple(cell, tuple) &&
+                        this._candidatesCount(cell) == nTuple) {
+                        cellsSetsWithTuples.push({ cell: cell, members: tuple });
+                    }
+                });
+                if (cellsSetsWithTuples.length == nTuple) {
+                    tuples.push(cellsSetsWithTuples);
+                }
+            });
+        });
+
+        return tuples;
+    }
+
 }

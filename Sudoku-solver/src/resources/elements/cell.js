@@ -40,6 +40,12 @@ export class CellCustomElement {
                 this._removeCandidate(cell.props.value);
             }
         });
+
+        this._sweepRowSubscriber = this._eventAggregator.subscribe('sweepRow', data => {
+            if (this.row == data.row && data.omit.indexOf(this.col) < 0) {
+                this._removeCandidate(data.value);
+            }
+        });
     }
 
     detached() {
@@ -47,6 +53,7 @@ export class CellCustomElement {
         this._toggleSetupModeSubscriber.dispose();
         this._sweepselfSubscriber.dispose();
         this._cellValueSetSubscriber.dispose();
+        this._sweepRowSubscriber.dispose();
     }
 
     selectCandidate(value) {
