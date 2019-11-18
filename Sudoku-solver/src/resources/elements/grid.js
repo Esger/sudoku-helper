@@ -63,24 +63,41 @@ export class GridCustomElement {
 
     _findTuples() {
         [2, 3, 4, 5].forEach(size => {
-            let tuples = this._gridService.findTuples('rows', size);
-            tuples.forEach(area => {
-                let omitIndices = area.map(tuple => tuple.cell.props.col);
-                // area.forEach(tuple => {
-                let tuple = area[0];
-                tuple.members.forEach(member => {
-                    let data = {
-                        col: tuple.cell.props.col,
-                        row: tuple.cell.props.row,
-                        omit: omitIndices,
-                        value: member
-                    };
-                    this._eventAggregator.publish('sweepRow', data);
+            ['rows', 'cols'].forEach(kind => {
+                let tuples;
+                switch (kind) {
+                    case 'rows': tuples = this._gridService.findTuples('rows', size);
+                        break;
+                    case 'cols': tuples = this._gridService.findTuples('cols', size);
+                        break;
+                }
+                tuples.forEach(area => {
+                    let omitIndices;
+                    switch (kind) {
+                        case 'rows': omitIndices = area.map(tuple => tuple.cell.props.col);
+                            break;
+                        case 'cols': omitIndices = area.map(tuple => tuple.cell.props.row);
+                            break;
+                    }
+                    let tuple = area[0];
+                    tuple.members.forEach(member => {
+                        let data = {
+                            col: tuple.cell.props.col,
+                            row: tuple.cell.props.row,
+                            omit: omitIndices,
+                            value: member
+                        };
+                        switch (kind) {
+                            case 'rows': this._eventAggregator.publish('sweepRow', data);
+                                break;
+                            case 'cols': this._eventAggregator.publish('sweepCol', data);
+                                break;
+                        }
+
+                    });
                 });
-                // });
             });
 
-            // this.findColTuples(value);
             // this.findBlockTuples(value);
         });
     }
