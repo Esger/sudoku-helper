@@ -42,13 +42,25 @@ export class CellCustomElement {
         });
 
         this._sweepRowSubscriber = this._eventAggregator.subscribe('sweepRow', data => {
-            if (this.row == data.row && data.omit.indexOf(this.col) < 0) {
+            let cell = data.cell;
+            let omit = data.omit;
+            if (this.row == cell.props.row && omit.indexOf(this.col) < 0) {
                 this._removeCandidate(data.value);
             }
         });
 
         this._sweepColSubscriber = this._eventAggregator.subscribe('sweepCol', data => {
-            if (this.col == data.col && data.omit.indexOf(this.row) < 0) {
+            let cell = data.cell;
+            let omit = data.omit;
+            if (this.col == cell.props.col && omit.indexOf(this.row) < 0) {
+                this._removeCandidate(data.value);
+            }
+        });
+
+        this._sweepColSubscriber = this._eventAggregator.subscribe('sweepBlock', data => {
+            let cell = data.cell;
+            let omit = data.omit;
+            if (this._inThisBlock(cell.props.row, cell.props.col) && !this._inCells(omit)) {
                 this._removeCandidate(data.value);
             }
         });
@@ -110,6 +122,12 @@ export class CellCustomElement {
 
     _index2Block(index) {
         return Math.floor(index / 3);
+    }
+
+    _inCells(cells) {
+        return cells.some(cell => {
+            return cell[0] == this.row && cell[1] == this.col;
+        });
     }
 
     _inThisBlock(row, col) {

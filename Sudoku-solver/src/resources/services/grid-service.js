@@ -79,6 +79,20 @@ export class GridService {
         return cell && cell.candidates && !candidates.some(candidate => candidate >= 0);
     }
 
+    _areaIsCorrect(area) {
+        let sum = area.reduce((accumulator, currentValue) =>
+            accumulator + currentValue.props.value, 0
+        );
+        return sum == 36;
+    }
+
+    _allAreasCorrect() {
+        let rowsCorrect = this._rows.every(row => this._areaIsCorrect(row));
+        let colsCorrect = this._cols.every(col => this._areaIsCorrect(col));
+        let blocksCorrect = this._blocks.every(block => this._areaIsCorrect(block));
+        return rowsCorrect && colsCorrect && blocksCorrect;
+    }
+
     getStatus() {
         let flatRows = this._rows.flat();
         let cellsSetCount = flatRows.flat().filter(cell => {
@@ -88,7 +102,12 @@ export class GridService {
         switch (cellsSetCount) {
             case 0: newStatus = 'empty'; break;
             case 1: newStatus = 'initial'; break;
-            case 81: newStatus = 'solved'; break;
+            case 81: if (this._allAreasCorrect()) {
+                newStatus = 'solved';
+            } else {
+                newStatus = 'error';
+            }
+                break;
             default: if (this._rows.some(cell => this._hasNoCandidates(cell))) {
                 newStatus = 'error';
             } else {

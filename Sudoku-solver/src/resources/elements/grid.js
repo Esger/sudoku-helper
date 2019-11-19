@@ -62,13 +62,15 @@ export class GridCustomElement {
     }
 
     _findTuples() {
-        [2, 3, 4, 5].forEach(size => {
-            ['rows', 'cols'].forEach(kind => {
+        [2, 3, 4, 5].forEach(tupleSize => {
+            ['rows', 'cols', 'blocks'].forEach(kind => {
                 let tuples;
                 switch (kind) {
-                    case 'rows': tuples = this._gridService.findTuples('rows', size);
+                    case 'rows': tuples = this._gridService.findTuples('rows', tupleSize);
                         break;
-                    case 'cols': tuples = this._gridService.findTuples('cols', size);
+                    case 'cols': tuples = this._gridService.findTuples('cols', tupleSize);
+                        break;
+                    case 'blocks': tuples = this._gridService.findTuples('blocks', tupleSize);
                         break;
                 }
                 tuples.forEach(area => {
@@ -78,12 +80,13 @@ export class GridCustomElement {
                             break;
                         case 'cols': omitIndices = area.map(tuple => tuple.cell.props.row);
                             break;
+                        case 'blocks': omitIndices = area.map(tuple => [tuple.cell.props.row, tuple.cell.props.col]);
+                            break;
                     }
                     let tuple = area[0];
                     tuple.members.forEach(member => {
                         let data = {
-                            col: tuple.cell.props.col,
-                            row: tuple.cell.props.row,
+                            cell: tuple.cell,
                             omit: omitIndices,
                             value: member
                         };
@@ -91,6 +94,8 @@ export class GridCustomElement {
                             case 'rows': this._eventAggregator.publish('sweepRow', data);
                                 break;
                             case 'cols': this._eventAggregator.publish('sweepCol', data);
+                                break;
+                            case 'blocks': this._eventAggregator.publish('sweepBlock', data);
                                 break;
                         }
 
