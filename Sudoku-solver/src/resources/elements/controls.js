@@ -7,7 +7,7 @@ export class ControlsCustomElement {
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
         this.tucked = true;
-        this.setupMode = false;
+        this.setupMode = true;
         this.hideTimeoutHandle = undefined;
         this.thinkingProgress = 0;
         this._addListeners();
@@ -47,6 +47,10 @@ export class ControlsCustomElement {
 
     resetGrid() {
         this._eventAggregator.publish('resetGrid');
+    }
+
+    solveIt() {
+        this._eventAggregator.publish('solveIt');
     }
 
     toggleSetupMode() {

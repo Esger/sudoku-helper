@@ -1,8 +1,8 @@
 <template>
 
-    <progress class="thinkingProgress"
+    <!-- <progress class="thinkingProgress"
               value.bind="thinkingProgress"
-              max="100"></progress>
+              max="100"></progress> -->
 
     <div click.delegate="showControls()"
          mouseover.delegate="showControls()"
@@ -21,6 +21,10 @@
         <button class="button"
                 click.delegate="resetGrid()"
                 touchstart.delegate="resetGrid()">Reset</button>
+
+        <button class="button"
+                click.delegate="solveIt()"
+                touchstart.delegate="solveIt()">Solve</button>
 
     </div>
 

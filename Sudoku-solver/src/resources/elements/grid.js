@@ -19,7 +19,6 @@ export class GridCustomElement {
 
     attached() {
         this._addListeners();
-        this._processGrid();
     }
 
     detached() {
@@ -30,6 +29,9 @@ export class GridCustomElement {
     _addListeners() {
         this._cellValueSetSubscriber = this._eventAggregator.subscribe('addCheck', _ => {
             this._addCheck();
+        });
+        this._solveSubscriber = this._eventAggregator.subscribe('solveIt', _ => { 
+            this._processGrid();
         });
     }
 
