@@ -15,10 +15,14 @@ export class GridService {
     reset() {
         this._cellsReadyCount = 0;
         this._cells = this._candidates.map(cell => cell = {});
-        this._grid = this._candidates.map(row => row = this._cells.slice());
         this._cols = this._newGrid();
         this._rows = this._newGrid();
         this._blocks = this._newGrid();
+        this._areaSets = {
+            'rows': this._rows,
+            'cols': this._cols,
+            'blocks': this._blocks
+        };
     }
 
     _newGrid() {
@@ -140,15 +144,9 @@ export class GridService {
 
     findUniqueAreaCandidates() {
         let cells = [];
-        this._rows.forEach(row => {
-            cells = cells.concat(this.findUniqueCandidates(row));
-        });
-        this._cols.forEach(col => {
-            cells = cells.concat(this.findUniqueCandidates(col));
-        });
-        this._blocks.forEach(block => {
-            cells = cells.concat(this.findUniqueCandidates(block));
-        });
+        Object.values(this._areaSets).
+            forEach(areaSet => areaSet.
+                forEach(area => cells = cells.concat(this.findUniqueCandidates(area))));
         return cells;
     }
 
@@ -158,17 +156,11 @@ export class GridService {
     }
 
     _candidatesCount(cell) {
-        let candidateCount = cell.candidates.filter(candidate => candidate >= 0).length;
-        return candidateCount;
+        return cell.candidates.filter(candidate => candidate >= 0).length;
     }
 
-    findTuples(dimension, nTuple) {
-        let cells, tuples = [];
-        switch (dimension) {
-            case 'rows': cells = this._rows; break;
-            case 'cols': cells = this._cols; break;
-            case 'blocks': cells = this._blocks; break;
-        }
+    findTuples(areaType, nTuple) {
+        let cells = this._areaSets[areaType], tuples = [];
 
         this._tuples[nTuple].forEach(tuple => {
             cells.forEach(area => {
