@@ -102,8 +102,6 @@ export class GridCustomElement {
                     });
                 });
             });
-
-            // this.findBlockTuples(value);
         });
     }
 

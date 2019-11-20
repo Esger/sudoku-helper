@@ -72,11 +72,7 @@ export class GridService {
     }
 
     _isSet(cell) {
-        if (cell && cell.props && cell.props.value >= 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (cell && cell.props && cell.props.value >= 0);
     }
 
     _hasNoCandidates(cell) {
@@ -84,24 +80,20 @@ export class GridService {
     }
 
     _areaIsCorrect(area) {
-        let sum = area.reduce((accumulator, currentValue) =>
+        return area.reduce((accumulator, currentValue) =>
             accumulator + currentValue.props.value, 0
-        );
-        return sum == 36;
+        ) == 36;
     }
 
     _allAreasCorrect() {
-        let rowsCorrect = this._rows.every(row => this._areaIsCorrect(row));
-        let colsCorrect = this._cols.every(col => this._areaIsCorrect(col));
-        let blocksCorrect = this._blocks.every(block => this._areaIsCorrect(block));
-        return rowsCorrect && colsCorrect && blocksCorrect;
+        return Object.values(this._areaSets).
+            every(areaSet => areaSet.
+                every(area => this._areaIsCorrect(area)));
     }
 
     getStatus() {
         let flatRows = this._rows.flat();
-        let cellsSetCount = flatRows.flat().filter(cell => {
-            return this._isSet(cell);
-        }).length;
+        let cellsSetCount = flatRows.flat().filter(cell => this._isSet(cell)).length;
         let newStatus;
         switch (cellsSetCount) {
             case 0: newStatus = 'empty'; break;
