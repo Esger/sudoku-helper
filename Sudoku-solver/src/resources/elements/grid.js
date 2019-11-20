@@ -106,7 +106,7 @@ export class GridCustomElement {
     }
 
     _processGrid() {
-        this._processHandlgsrtyregcfgrceId = setInterval(() => {
+        this._processHandleId = setInterval(() => {
             if (this._doChecks > 0) {
                 this._findUniques();
                 this._findTuples();
