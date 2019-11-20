@@ -7,10 +7,14 @@ export class ControlsCustomElement {
     constructor(eventAggregator) {
         this._eventAggregator = eventAggregator;
         this.tucked = true;
-        this.setupMode = true;
+        this.setupMode = false;
         this.hideTimeoutHandle = undefined;
         this.thinkingProgress = 0;
         this._addListeners();
+    }
+
+    attached() {
+        this.toggleSetupMode();
     }
 
     _addListeners() {

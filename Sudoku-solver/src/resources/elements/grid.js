@@ -57,7 +57,7 @@ export class GridCustomElement {
     }
 
     _findUniques() {
-        let cells = this._gridService.findUniqueRowColBlockCandidates();
+        let cells = this._gridService.findUniqueAreaCandidates();
         this._signalCellValuesFound(cells);
     }
 

@@ -138,7 +138,7 @@ export class GridService {
         return theCells;
     }
 
-    findUniqueRowColBlockCandidates() {
+    findUniqueAreaCandidates() {
         let cells = [];
         this._rows.forEach(row => {
             cells = cells.concat(this.findUniqueCandidates(row));
@@ -153,17 +153,8 @@ export class GridService {
     }
 
     _candidatesContainTuple(cell, tuple) {
-        let result;
-        if (cell.props.value < 0) {
-            // use .some for subset
-            result = tuple.every(value => {
-                let result = (cell.candidates.indexOf(value) >= 0);
-                return result;
-            });
-        } else {
-            result = false;
-        }
-        return result;
+        return cell.props.value < 0 &&
+            cell.candidates.every(value => tuple.indexOf(value) >= 0 || value < 0);
     }
 
     _candidatesCount(cell) {
@@ -184,7 +175,7 @@ export class GridService {
                 let cellsSetsWithTuples = [];
                 area.forEach(cell => {
                     if (this._candidatesContainTuple(cell, tuple) &&
-                        this._candidatesCount(cell) == nTuple) {
+                        this._candidatesCount(cell) <= nTuple) {
                         cellsSetsWithTuples.push({ cell: cell, members: tuple });
                     }
                 });
